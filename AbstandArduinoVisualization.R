@@ -8,12 +8,12 @@ library(stringr)
 
 
 
-###################THE TABLES TO BE COMBINED WIRH ARDUINO#############################################
+################### THE TABLES TO BE COMBINED FROM SP DATA AND ARDUINO #############################################
 
 #  We load the csv data from SP and arduino
-experiment    <- fread("1N16_SP.csv")
-exper.arduino <- fread('1N161127.csv')
-
+experiment    <- fread("2N16_SP.csv")
+exper.arduino <- fread('2N161127.csv')
+plot.name  <-"2N161127"
 
 
 # we take only the rows that have actual data
@@ -92,7 +92,7 @@ last.record.sm.cu  <- select(exper.kupfer,Bezeichnung,end_sec) %>% filter( Bezei
 
 
 
-####################ARDUINO DATA######################
+#################### ARDUINO DATA ######################
 colnames(exper.arduino) <- c("matt_1","matt_2","matt_3","matt_4","matt_5","distance_mm","measur_status")
 
 
@@ -118,7 +118,7 @@ exper.ard.abstand <- exper.ard.abstand %>% transmute(distance_cm = distance_mm /
 
 
 
-###############################WARNING ABOUT UNRECORDED ACTIVE STAGES FROM THE SP DATA##################################
+############################### WARNING ABOUT UNRECORDED ACTIVE STAGES FROM THE SP DATA ##################################
 
 # Set a warning that we had an arduino measurement that was not recorded with the SP data in between the different stages
 
@@ -204,6 +204,13 @@ p <- ggplot() +
   # measurements considered
   geom_point(data = visual.abstand.1,    aes(x = end_sec, y = Abstand..cm.), colour = 'green', shape = 10, size = 5 )  
   
-  
+
+#saving the plot
+plot.name=paste(plot.name, ".pdf")
+
+ggsave(plot.name, plot = last_plot())
+
+
+
   
   
