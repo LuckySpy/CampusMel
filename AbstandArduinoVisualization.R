@@ -6,10 +6,13 @@ library(stringr)
 
 
 
+
+
 ###################THE TABLES TO BE COMBINED WIRH ARDUINO#############################################
 
-#  We load the csv data to see how we are going to handle them.
-experiment<-fread("4N16_SP.csv")
+#  We load the csv data from SP and arduino
+experiment    <- fread("1N16_SP.csv")
+exper.arduino <- fread('1N161127.csv')
 
 
 
@@ -90,7 +93,6 @@ last.record.sm.cu  <- select(exper.kupfer,Bezeichnung,end_sec) %>% filter( Bezei
 
 
 ####################ARDUINO DATA######################
-exper.arduino           <- fread('4N161131.csv')
 colnames(exper.arduino) <- c("matt_1","matt_2","matt_3","matt_4","matt_5","distance_mm","measur_status")
 
 
@@ -159,15 +161,10 @@ warnUnrecorded <- function(df){
 
 
 
-################Visualization######################################
-
-
-  
 
 
 
-
-###################COMBINATION OF ARDUINO AND SMARTPEN DATA####################
+###################COMBINATION OF ARDUINO AND SMARTPEN DATA AND VISUALIZATION####################
 
 
 
@@ -185,24 +182,6 @@ colnames(exp.distances)[1]<-"distances"
 visual.abstand <- filter(exper.abstand, Bezeichnung == 'Messung_Ab') 
 visual.abstand <- cbind(end_sec= visual.abstand$end_sec, Abstand..cm. = visual.abstand$Abstand..cm., 
                         Benutzt.in.Ausw. = visual.abstand$Benutzt.in.Ausw.) %>% as.data.frame()
-
-
-
-#Change the distances of the SP data to be equal to the ones that arduino censor has measured
-
-for(i in 1 : nrow(visual.abstand)){
-  for(j in 1:nrow(exp.distances))
-  {
-  
-    if ( (round(exp.distances[j,1]-0.6) == round(visual.abstand[i,2]) | round(exp.distances[j,1]+0.6) == round(visual.abstand[i,2]) |  
-          exp.distances[j,1] == round(visual.abstand[i,2]) ) )
-  {
-    
-      visual.abstand[i,2] <- exp.distances[j,1]
-
-  }
- }
-}
 
 
 
