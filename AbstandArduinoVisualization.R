@@ -17,8 +17,8 @@ library(stringr)
 
 
 #  We load the csv data from SP and arduino
-experiment    <- fread('2N16_SP.csv')
-exper.arduino <- fread('2N161127.csv')
+experiment    <- fread('1N16_SP.csv')
+exper.arduino <- fread('1N161127.csv')
 plot.name  <-"2N161127"
 
 
@@ -170,7 +170,7 @@ warnUnrecorded <- function(df){
 
 
 
-###################COMBINATION OF ARDUINO AND SMARTPEN DATA AND VISUALIZATION####################
+###################COMBINATION OF ARDUINO AND SMARTPEN DATA AND VISUALIZATION OF ABSTAND####################
 
 
 
@@ -206,15 +206,19 @@ exper.ard.abstand.0 <- filter(exper.ard.abstand, exper.ard.abstand$measur_status
 # Visualization of the desired 4 categories that mentioned above
 
 p <- ggplot() +
-  # active periods
-  geom_point(data = exper.ard.abstand.1, aes(x= real_sec, y= distance_cm),   colour = 'coral', shape = 15, size = 1 ) + 
-  # inactive periods
-  geom_point(data = exper.ard.abstand.0, aes(x= real_sec, y= distance_cm),   colour = 'blue', shape = 15, size = 1) + 
-  # measurements not considered
-  geom_point(data = visual.abstand.0,    aes(x= end_sec, y= Abstand..cm.),   colour = 'red', shape = 10, size = 5 ) + 
-  # measurements considered
-  geom_point(data = visual.abstand.1,    aes(x = end_sec, y = Abstand..cm.), colour = 'green', shape = 10, size = 5 )  
   
+  geom_point(data = exper.ard.abstand.0, aes(x= real_sec, y= distance_cm),   colour = 'blue', shape = 15, size = 0.5) + 
+  # active periods
+  geom_point(data = exper.ard.abstand.1, aes(x= real_sec, y= distance_cm),   colour = 'coral', shape = 15, size = 0.5 ) + 
+  # inactive periods
+ 
+  # measurements not considered
+  geom_point(data = visual.abstand.0,    aes(x= end_sec, y= Abstand..cm.),   colour = 'red', shape = 10, size = 10 ) + 
+  # measurements considered
+  geom_point(data = visual.abstand.1,    aes(x = end_sec, y = Abstand..cm.), colour = 'green', shape = 10, size = 10 )+
+  
+ scale_y_continuous(name ="Abstand in cm",expand=c(0,0),limits = c(0,40)) +                                                # The limits (strart and finish) of y axes which are discrete values
+   scale_x_continuous(name ="Versuchszeit in Sekunden")
 
 
 
@@ -222,6 +226,41 @@ p <- ggplot() +
 plot.name=paste(plot.name, ".pdf")
 ggsave(plot.name, plot = last_plot())
 
+
+###################COMBINATION OF ARDUINO AND SMARTPEN DATA AND VISUALIZATION OF ALUMINIUM####################
+
+# Extract only the columns we need from thee SP data for the Abstand
+
+visual.aluminium<- filter(exper.aluminium, Bezeichnung == 'Messung_Al')                    # Filter only the distance measurements from the stage Abstand                   
+visual.aluminium <- cbind(end_sec= visual.aluminium$end_sec, Absorber.dicke..cm. =         # Mergge the columns that are going to be used for visualization
+                            visual.aluminium$Absorber.dicke..cm., Benutzt.in.Ausw. = 
+                            visual.aluminium$Benutzt.in.Ausw.) %>% as.data.frame()
+
+
+#Find the thikness of the matterials
+
+#Divide the tables produced in the 4 different categories we are going to visualize
+
+visual.aluminium.1    <- filter(visual.aluminium, visual.aluminium$Benutzt.in.Ausw. == 1)    # Measurement considered in the final formula calculation
+visual.aluminium.0    <- filter(visual.aluminium, visual.aluminium$Benutzt.in.Ausw. == 0)    # Measurement considered in the final formula calculation
+exper.ard.aluminium.1 <- filter(exper.ard.aluminium, exper.ard.aluminium$measur_status == 1) # Period that the arduino controller was measuring
+exper.ard.aluminium.0 <- filter(exper.ard.aluminium, exper.ard.aluminium$measur_status == 0) # Idle period of arduino controller
+
+
+
+p <- ggplot() +
+  # active periods
+  geom_point(data = exper.ard.aluminium.1, aes(x= real_sec, y= distance_cm),   colour = 'coral', shape = 15, size = 1 ) + 
+  # inactive periods
+  geom_point(data = exper.ard.aluminium.0, aes(x= real_sec, y= distance_cm),   colour = 'blue', shape = 15, size = 1) + 
+  # measurements not considered
+  geom_point(data = visual.aluminium.0,    aes(x= end_sec, y= Absorber.dicke..cm.),   colour = 'red', shape = 10, size = 5 ) + 
+  # measurements considered
+  geom_point(data = visual.aluminium.1,    aes(x = end_sec, y = Absorber.dicke..cm.), colour = 'green', shape = 10, size = 5 )  
+
+
+
+###################COMBINATION OF ARDUINO AND SMARTPEN DATA AND VISUALIZATION OF KUPFER####################
 
 
   

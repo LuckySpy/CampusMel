@@ -4,7 +4,7 @@
 
 # We load the csv data to see how we are going to process them.
 
-experiment<-read.csv("1N16_SP.csv", sep=";")
+experiment<-read.csv("4N16_SP.csv", sep=";")
 plot.name  <-"1N16_SP"
 
 
@@ -103,11 +103,11 @@ total.time.stages <- transform(total.time.stages, duration = total.time.stages$e
 exper.stages.table$stage <- 0
 exper.stages.table$stage <- exper.stages.table$Bezeichnung
 
-exper.stages.table$stage <- gsub(".*_Ab_.*"                 , "Abstand"      ,exper.stages.table$stage)
-exper.stages.table$stage <- gsub(".*_Al_.*"                 , "Aluminium"     ,exper.stages.table$stage)
-exper.stages.table$stage <- gsub(".*_Cu_.*"                 , "Kupfer"        ,exper.stages.table$stage)
+exper.stages.table$stage <- gsub(".*_Ab_.*"                 , "1. Teilversuch:\nAbstand"       ,exper.stages.table$stage)
+exper.stages.table$stage <- gsub(".*_Al_.*"                 , "2. Teilversuch:\nAluminium"     ,exper.stages.table$stage)
+exper.stages.table$stage <- gsub(".*_Cu_.*"                 , "3. Teilversuch:\nKupfer"        ,exper.stages.table$stage)
 exper.stages.table$stage <- gsub(".*Vorbesprechung*"        , "Vorbesprechung",exper.stages.table$stage)
-exper.stages.table$stage <- gsub("Vergleich_Proportional.*" , "VergleichP"    ,exper.stages.table$stage)
+exper.stages.table$stage <- gsub("Vergleich_Proportional.*" , "Vergleich"    ,exper.stages.table$stage)
 
 
 
@@ -120,7 +120,7 @@ exper.stages.table$sub.stage <- gsub("Messung_.*"               , "Messung"   ,e
 exper.stages.table$sub.stage <- gsub("Auswertung_.*"            , "Auswertung",exper.stages.table$sub.stage)
 exper.stages.table$sub.stage <- gsub("Zeichnung_.*"             , "Zeichnung" ,exper.stages.table$sub.stage)
 exper.stages.table$sub.stage <- gsub("Berechnung_.*"            , "Berechnung",exper.stages.table$sub.stage)
-exper.stages.table$sub.stage <- gsub("Vergleich_Proportional.*" , "VergleichP",exper.stages.table$sub.stage)
+exper.stages.table$sub.stage <- gsub("Vergleich_Proportional.*" , "Vergleich",exper.stages.table$sub.stage)
 
 
 
@@ -132,10 +132,8 @@ exper.stages.table <-exper.stages.table[!grepl("Erkl.*rung"         ,   exper.st
 
 
 # Convert stages and substages to factor so we can customize their levels. It will be needed for the visualization
-exper.stages.table$stage = factor(exper.stages.table$stage,levels         = c('Vorbesprechung','Abstand','Aluminium','Kupfer','VergleichP'))
-exper.stages.table$sub.stage = factor(exper.stages.table$sub.stage,levels = c('Vorbesprechung', 'Auswertung', 'Zeichnung', 'Berechnung', 'Messung', 'VergleichP'))
-
-
+exper.stages.table$stage = factor(exper.stages.table$stage,levels         = c('Vorbesprechung','1. Teilversuch:\nAbstand','2. Teilversuch:\nAluminium','3. Teilversuch:\nKupfer','Vergleich'))
+exper.stages.table$sub.stage = factor(exper.stages.table$sub.stage,levels = c('Vorbesprechung', 'Auswertung', 'Zeichnung', 'Berechnung', 'Messung', 'Vergleich'))
 
 
 
@@ -155,17 +153,17 @@ colScale <- scale_colour_manual(name = "sub.stage",values = myColors)
 
  
  pl<-ggplot(exper.stages.table) +                                                               # Data to be used for visualizatoin
-   scale_y_discrete(name ="Arbeitet Schritte") +                                                # The limits (strart and finish) of y axes which are discrete values
-   scale_x_continuous(name ="Versuchszeit (sec)",expand = c(0, 0), 
+   scale_y_discrete(name ="Arbeitsschritte", expand = c(2.2,0)) +                                                # The limits (strart and finish) of y axes which are discrete values
+   scale_x_continuous(name ="Versuchszeit in Sekunden",expand = c(0 , 0), 
                       limits = c(0,exper.stages.table$end_sec[nrow(exper.stages.table)]+100))+  # The limits of the x axes which is a continuous value (sec)
    theme(legend.position = "None") +                                                            # No legend for the visualization
    geom_segment(aes(x = start_sec, y = sub.stage, xend = end_sec, yend = sub.stage,             # Type of visualizaiton which is segment
                     color = sub.stage, size = 4)) +
-   facet_wrap(stage ~., ncol = 1, nrow = 5) +                                                   # Visulize same values of interest depending on different categories we have set
-   facet_grid(stage ~.,scales = "free",space = "free") +                                        # Grid size depending on the values to be dispayed
-   theme(strip.text.y = element_text(angle = 0))+
-   guides(size = 'none')+
-   colScale 
+   facet_wrap(stage ~., ncol = 1, nrow = 5, shrink = TRUE ) +                                                   # Visulize same values of interest depending on different categories we have set
+   facet_grid(stage ~.,scales = "free_y",space = "free") +                                        # Grid size depending on the values to be dispayed
+   theme(strip.text.y = element_text( angle = 0))+
+   # guides(size = 'none') +
+    colScale 
  
  
  
