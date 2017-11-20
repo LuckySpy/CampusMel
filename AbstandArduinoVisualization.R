@@ -10,8 +10,14 @@ library(stringr)
 
 ################### THE TABLES TO BE COMBINED FROM SP DATA AND ARDUINO #############################################
 
+
+#load the vlues from the specific directory
+
+
+
+
 #  We load the csv data from SP and arduino
-experiment    <- fread("2N16_SP.csv")
+experiment    <- fread('2N16_SP.csv')
 exper.arduino <- fread('2N161127.csv')
 plot.name  <-"2N161127"
 
@@ -120,7 +126,7 @@ exper.ard.abstand <- exper.ard.abstand %>% transmute(distance_cm = distance_mm /
 
 ############################### WARNING ABOUT UNRECORDED ACTIVE STAGES FROM THE SP DATA ##################################
 
-# Set a warning that we had an arduino measurement that was not recorded with the SP data in between the different stages
+# Set a warning that we had an arduino measurement that was not recorded with the SP data in between the different stages or before and after
 
 idle.time.exper.ard.abstand.before <- filter(exper.arduino, (real_sec <= (first.record.sm.ab[1,1] - 120)))
 idle.time.exper.ard.abstand.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.ab[1,1] + 120)) &  (real_sec <= (first.record.sm.al[1,1] - 120)))
@@ -171,28 +177,33 @@ warnUnrecorded <- function(df){
 
 # Extract the unique "real" distances during the active periods of the arduino
 
-exp.distances <-  filter( exper.ard.abstand, measur_status==1) %>% unique()
-exp.distances <- unique(exp.distances$distance_cm) %>% as.data.frame()
-colnames(exp.distances)[1]<-"distances"
+# exp.distances <-  filter( exper.ard.abstand, measur_status==1) %>% unique()
+# exp.distances <- unique(exp.distances$distance_cm) %>% as.data.frame()
+# colnames(exp.distances)[1]<-"distances"
 
 
 
 # Extract only the columns we need from thee SP data for the Abstand
 
-visual.abstand <- filter(exper.abstand, Bezeichnung == 'Messung_Ab') 
-visual.abstand <- cbind(end_sec= visual.abstand$end_sec, Abstand..cm. = visual.abstand$Abstand..cm., 
-                        Benutzt.in.Ausw. = visual.abstand$Benutzt.in.Ausw.) %>% as.data.frame()
+visual.abstand <- filter(exper.abstand, Bezeichnung == 'Messung_Ab')            # Filter only the distance measurements from the stage Abstand                   
+visual.abstand <- cbind(end_sec= visual.abstand$end_sec, Abstand..cm. =         # Mergge the columns that are going to be used for visualization
+                          visual.abstand$Abstand..cm., Benutzt.in.Ausw. = 
+                          visual.abstand$Benutzt.in.Ausw.) %>% as.data.frame()
+
 
 
 
 #Divide the tables produced in the 4 different categories we are going to visualize
 
-visual.abstand.1    <- filter(visual.abstand, visual.abstand$Benutzt.in.Ausw. == 1)
-visual.abstand.0    <- filter(visual.abstand, visual.abstand$Benutzt.in.Ausw. == 0)
-exper.ard.abstand.1 <- filter(exper.ard.abstand, exper.ard.abstand$measur_status == 1)
-exper.ard.abstand.0 <- filter(exper.ard.abstand, exper.ard.abstand$measur_status == 0)
+visual.abstand.1    <- filter(visual.abstand, visual.abstand$Benutzt.in.Ausw. == 1)    # Measurement considered in the final formula calculation
+visual.abstand.0    <- filter(visual.abstand, visual.abstand$Benutzt.in.Ausw. == 0)    # Measurement considered in the final formula calculation
+exper.ard.abstand.1 <- filter(exper.ard.abstand, exper.ard.abstand$measur_status == 1) # Period that the arduino controller was measuring
+exper.ard.abstand.0 <- filter(exper.ard.abstand, exper.ard.abstand$measur_status == 0) # Idle period of arduino controller
 
 
+
+
+# Visualization of the desired 4 categories that mentioned above
 
 p <- ggplot() +
   # active periods
@@ -205,9 +216,10 @@ p <- ggplot() +
   geom_point(data = visual.abstand.1,    aes(x = end_sec, y = Abstand..cm.), colour = 'green', shape = 10, size = 5 )  
   
 
-#saving the plot
-plot.name=paste(plot.name, ".pdf")
 
+
+#saving the plot in pdf file
+plot.name=paste(plot.name, ".pdf")
 ggsave(plot.name, plot = last_plot())
 
 

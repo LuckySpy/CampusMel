@@ -5,6 +5,7 @@
 # We load the csv data to see how we are going to process them.
 
 experiment<-read.csv("1N16_SP.csv", sep=";")
+plot.name  <-"1N16_SP"
 
 
 #We have to try to visualize the time for each one of the different parts of the data from the smart pen
@@ -19,16 +20,16 @@ task.time.diff  <- as.data.frame(as.numeric(difftime(temp2, temp1, units = "sec"
 # From library lubridate we calculate using hms(hourss minutes second the seconds of the beginning and ending)
 library(lubridate)
 
-task.time.strt <- as.data.frame(as.numeric(as.period(hms(experiment$Anfang_0), unit = "sec")))
-task.time.end  <- as.data.frame(as.numeric(as.period(hms(experiment$Ende_0),   unit = "sec")))
+task.time.strt <- as.data.frame(as.numeric(as.period(hms(experiment$Anfang_0), unit = "sec"))) # Convert the hour minnute second to seconds for the corresponding column
+task.time.end  <- as.data.frame(as.numeric(as.period(hms(experiment$Ende_0),   unit = "sec"))) # Convert the hour minnute second to seconds for the corresponding column
 
-
+#Renaming the vectors (which are saved as data frames) that we have created  
 colnames(task.time.strt)[1] <- ("start_sec")
 colnames(task.time.end )[1] <- ("end_sec")
 colnames(task.time.diff)[1] <- ("duration")
 
 
-
+# Binding the columns of interest and renaming the first column
 temp<- cbind(experiment$Bezeichnung, task.time.strt, task.time.end, task.time.diff)
 colnames(temp)[1]  <- ("Bezeichnung")
 
@@ -39,7 +40,7 @@ exper.stages.table <-temp[!(is.na(temp$duration) ), ]
 
 
 
-#Remove the rows of the data table we do not need
+#Remove the rows of the data table we do not need using !grepl pattern matching and replacement 
 exper.stages.table <-exper.stages.table[!grepl(".*_Achse",   exper.stages.table$Bezeichnung),]
 exper.stages.table <-exper.stages.table[!grepl(".*x_Gr.*e",  exper.stages.table$Bezeichnung),]
 exper.stages.table <-exper.stages.table[!grepl(".*y_Gr.*e",  exper.stages.table$Bezeichnung),]
@@ -124,9 +125,9 @@ exper.stages.table$sub.stage <- gsub("Vergleich_Proportional.*" , "VergleichP",e
 
 
 
-# This must be changed so we can have only the rows we need
+#Remove the rows of the data table we do not need using !grepl pattern matching and replacement 
 exper.stages.table <-exper.stages.table[!grepl("Zeichnung_.*_Gerade",   exper.stages.table$Bezeichnung),]
-exper.stages.table <-exper.stages.table[!grepl("Erkl.*rung",   exper.stages.table$Bezeichnung),]
+exper.stages.table <-exper.stages.table[!grepl("Erkl.*rung"         ,   exper.stages.table$Bezeichnung),]
 
 
 
@@ -140,10 +141,6 @@ exper.stages.table$sub.stage = factor(exper.stages.table$sub.stage,levels = c('V
 
 ################## Customize the size of each facet####################
  
- #PLOT
-
-
-
 
 
  library(ggplot2)
@@ -157,17 +154,22 @@ colScale <- scale_colour_manual(name = "sub.stage",values = myColors)
 
 
  
- pl<-ggplot(exper.stages.table) +
-   scale_y_discrete(name ="Arbeitet Schritte")+
-   scale_x_continuous(name ="Versuchszeit (sec)",expand = c(0, 0), limits = c(0,exper.stages.table$end_sec[nrow(exper.stages.table)]+100))+
-   theme(legend.position = "None") +
-   geom_segment(aes(x = start_sec, y = sub.stage, xend = end_sec, yend = sub.stage,
+ pl<-ggplot(exper.stages.table) +                                                               # Data to be used for visualizatoin
+   scale_y_discrete(name ="Arbeitet Schritte") +                                                # The limits (strart and finish) of y axes which are discrete values
+   scale_x_continuous(name ="Versuchszeit (sec)",expand = c(0, 0), 
+                      limits = c(0,exper.stages.table$end_sec[nrow(exper.stages.table)]+100))+  # The limits of the x axes which is a continuous value (sec)
+   theme(legend.position = "None") +                                                            # No legend for the visualization
+   geom_segment(aes(x = start_sec, y = sub.stage, xend = end_sec, yend = sub.stage,             # Type of visualizaiton which is segment
                     color = sub.stage, size = 4)) +
-   facet_wrap(stage ~., ncol = 1, nrow = 5) +
-   facet_grid(stage ~.,scales = "free",space = "free") +
+   facet_wrap(stage ~., ncol = 1, nrow = 5) +                                                   # Visulize same values of interest depending on different categories we have set
+   facet_grid(stage ~.,scales = "free",space = "free") +                                        # Grid size depending on the values to be dispayed
    theme(strip.text.y = element_text(angle = 0))+
    guides(size = 'none')+
    colScale 
  
  
- #gesamtdaves
+ 
+ 
+ #Saving the plot in pdf file
+ plot.name = paste(plot.name, ".pdf")
+ ggsave(plot.name, plot = last_plot())
