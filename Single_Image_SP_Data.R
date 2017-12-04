@@ -5,8 +5,14 @@ library(stringr)
 library(lubridate)
 
 
-  file.name<-"./Daten/voll/1N16/1N16_SP.csv"
-  plot.name<-"1N16_SP"
+  # file.name<-"./Daten/voll/1N16/1N16_SP.csv"
+  # plot.name<-"1N16_SP"
+  # 
+  
+  file.name<-"1D19_SP.csv"
+  plot.name<-"1D19_SP"
+  
+  
   
   # We load the csv data to see how we are going to process them.
     experiment <-fread(file.name)
@@ -164,7 +170,7 @@ library(lubridate)
       ggtitle(plot.name) +                                                                         # Adding the plot name
       scale_y_discrete(name ="Arbeitsschritte", expand = c(0,1.2)) +                               # The limits (strart and finish) and scaling of y axes which are discrete values 
       scale_x_continuous(name ="Versuchszeit in Sekunden",expand = c(0, 0), 
-                         limits = c(0,exper.stages.table$end_sec[nrow(exper.stages.table)]+100))+  # The limits of the x axes which is a continuous value (sec)
+                         limits = c(0,max(exper.stages.table$end_sec)+100))+                       # The limits of the x axes which is a continuous value (sec)
       theme(legend.position = "None") +                                                            # No legend for the visualization
       geom_segment(aes(x = start_sec, y = sub.stage, xend = end_sec, yend = sub.stage,             # Type of visualizaiton which is segment
                        color = sub.stage, size = 4)) +
@@ -179,6 +185,6 @@ library(lubridate)
     
     #Saving the plot in pdf file
     plot.name = paste(plot.name, ".jpg", sep ="")
-    ggsave(plot.name, plot = last_plot(), width = 8, height = 4)
+    ggsave(plot.name, plot = last_plot(),width = 8, height = 4 )
     
  

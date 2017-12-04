@@ -22,17 +22,16 @@ image.dir      <- "./Bilder/Versuchsverlauf"
 for(i in 1:length(directory.name)){
   
   dfnSP        <- paste("./Daten/voll/",directory.name[i],"/",directory.name[i],"_SP.csv", sep ="")
-
-  dn         <- paste("./Daten/voll/",directory.name[i],sep = "")
-
-  plot.name.SP <- paste(directory.name[i],"_SP",sep = "")
+  dn           <- paste("./Daten/voll/",directory.name[i],sep = "")
+  plot.name.SP <- directory.name[i]
   
   
+ 
   if(i!=737){
     
    visualizeSP(dn, dfnSP, plot.name.SP, image.dir)
-    }
-  
+    
+  }
   counter[i+1]<- counter[i] +1
   
 }

@@ -79,8 +79,14 @@
 #######load the arduino data#######
 library(tidyverse)
 
-exper.arduino       <-read.csv("1N161127.csv", sep=";")
+#  We load the csv data from SP and arduino
+experiment    <- fread('./voll/1N16/1N16_SP.csv')
+# exper.arduino <- fread('./voll/1N16/1N16_AR.csv')
+exper.arduino       <-read.csv("./voll/1N16/1N16_AR.csv", sep=";")
+
+plot.name  <-"1N16_AR"
 colnames(exper.arduino) <- c("matt_1","matt_2","matt_3","matt_4","matt_5","distance_mm","measur_status")
+
 
 
 # We add the column real.sec that contains the real second that pass since the arduino started working

@@ -9,14 +9,66 @@ library(stringr)
 ################### THE TABLES TO BE COMBINED FROM SP DATA AND ARDUINO #############################################
 
 
-#load the vlues from the specific directory
+#Functions to be used
+thiknify <- function (matt, track, exp.num)
+{
+  if (matt == 1 & (exp.num %% 2 == 1 | exp.num == 8)){
+    switch(track,
+           0.003,
+           0.005,
+           0.01,
+           0.05,
+           0.08
+           )
+  }
+  
+  else if(matt == 1 & (exp.num %% 2 == 0)) {
+    switch(track,
+           0.0025,
+           0.005,
+           0.01,
+           0.03,
+           0.06
+           )
+  }
+  
+  else{ 
+    switch(track,
+           0.01,
+           0.05,
+           0.1,
+           0.2,
+           0.3
+           )
+    
+    
+    
+  }
+}
+
+
+# Function to check weather there is a measurement that hasn't been recorded
+warnUnrecorded <- function(df){
+  
+  check<- any((df$matt_1 == 0 & df$matt_2 == 0 & df$matt_3 == 0 & df$matt_4 == 0 & df$matt_5 == 0) & df$measur_status == 1)
+  
+  
+  check<- any((df$matt_1 == 2 | df$matt_2 == 2 | df$matt_3 == 2 | df$matt_4 == 2 | df$matt_5 == 2) & df$measur_status == 1)
+  
+  
+  check<- any((df$matt_1 == 1 | df$matt_2 == 1 | df$matt_3 == 1 | df$matt_4 == 1 | df$matt_5 == 1) & df$measur_status == 1)
+  
+  
+  return(check)
+  
+}
 
 
 
 
 #  We load the csv data from SP and arduino
 experiment    <- fread('./Daten/voll/1N16/1N16_SP.csv')
-exper.arduino <- fread('./Daten/voll/1N16/1N16_AR.csv')
+exper.arduino <- read.csv('./Daten/voll/1N16/1N16_AR.csv', sep = ";")
 plot.name  <-"1N16_AR"
 
 
@@ -37,7 +89,6 @@ task.time.diff  <- as.data.frame(as.numeric(difftime(temp2, temp1, units = "sec"
 
 
 # We calculate the time in sec using hms(hours minutes second the seconds of the beginning and ending)
-
 task.time.strt <- as.data.frame(as.numeric(as.period(hms(experiment$Anfang_0), unit = "sec")))
 task.time.end  <- as.data.frame(as.numeric(as.period(hms(experiment$Ende_0),   unit = "sec")))
 
@@ -54,9 +105,8 @@ colnames(temp)[1]  <- ("Bezeichnung")
 
 #################### Process the table so we can have data we need for each individual stage of the experiment##########################
 
-               
-# Put together in a dataframe the columns we are interested in
 
+# Put together in a dataframe the columns we are interested in
 exper.steps.table.all <- data.frame(  temp,`Abstand [cm]`  = experiment$`Abstand [cm]`, `Absorber-dicke [cm]` = experiment$`Absorber-dicke [cm]`, 
                                       `Zeitein-stellung [s]` = experiment$`Zeitein-stellung [s]`, `Benutzt in Ausw.` = experiment$`Benutzt in Ausw.`)
 
@@ -65,7 +115,6 @@ exper.steps.table.all <- exper.steps.table.all[!with(exper.steps.table.all,is.na
 
 
 #We drop some columns which are not useful for the individual stages, so we can create tables for each stage of the experiment
-
 exper.steps.table.ind <-exper.steps.table.all[!complete.cases(exper.steps.table.all[ , 2]),]
 exper.steps.table.ind$start_sec <-NULL
 exper.steps.table.ind$duration  <-NULL
@@ -73,7 +122,6 @@ exper.steps.table.ind$duration  <-NULL
 
 
 #Isolation of each different stage of the experiment (Abstand, Copper, Aluminium)
-
 exper.abstand   <-exper.steps.table.ind[grepl(".*_Ab",   exper.steps.table.ind$Bezeichnung),]
 exper.aluminium <-exper.steps.table.ind[grepl(".*_Al",   exper.steps.table.ind$Bezeichnung),]
 exper.kupfer    <-exper.steps.table.ind[grepl(".*_Cu",   exper.steps.table.ind$Bezeichnung),]
@@ -82,7 +130,6 @@ exper.kupfer    <-exper.steps.table.ind[grepl(".*_Cu",   exper.steps.table.ind$B
 
 
 # The first and last recordings of the stages(Ab, Al, Cu) based on the smart pen data
-
 first.record.sm.ab <- select(exper.abstand,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Ab') %>% select(end_sec) %>% head(n=1) 
 last.record.sm.ab  <- select(exper.abstand,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Ab') %>% select(end_sec) %>% tail(n=1)
 
@@ -104,9 +151,40 @@ colnames(exper.arduino) <- c("matt_1","matt_2","matt_3","matt_4","matt_5","dista
 exper.arduino$real_sec <- 1:nrow(exper.arduino) 
 
 
+#Create the table thik_table that consists the thikness of the material in each track (1-5)
+thik_table<-cbind(matt_1 = exper.arduino$matt_1, matt_2 = exper.arduino$matt_2, matt_3 = exper.arduino$matt_3, matt_4= exper.arduino$matt_4,
+                  matt_5 = exper.arduino$matt_5  ) %>% as.data.frame()
+
+
+# Retrieve the number of the experiment from the string name
+experiment.num <- substr(plot.name, 1, 1) %>% as.numeric()
+
+
+# Correspond the material and the thikness for each track and fill the df with the proper thikness
+for (i in 1:nrow(exper.arduino)){
+  for (j in 1:5){
+    
+    if (exper.arduino[i,j] == 1){
+      thik_table[i,j]<-  thiknify(1,j,experiment.num)
+    }  
+    
+    else if (exper.arduino[i,j] == 2){
+      thik_table[i,j]<-  thiknify(2,j,experiment.num)
+    }
+    else {
+      thik_table[i,j] <- 0
+      
+    }
+  }
+}
+
+# Add an extra column to exper.arduino that contains the sum of the thikness of all the tracks
+exper.arduino$dicke_ges <-  rowSums(thik_table[, c(1, 2, 3, 4, 5)])
+
+
+
+
 # Select only the rows of the individual stages(abstand 0, aluminium 2, Kupfer 1) and put them in separate tables table
-
-
 exper.ard.abstand   <- filter(exper.arduino, real_sec > (first.record.sm.ab[1,1] - 120)  &  (real_sec < last.record.sm.ab[1,1] + 120) )
 
 exper.ard.aluminium <- filter(exper.arduino, real_sec > (first.record.sm.al[1,1] - 120)  &  (real_sec < last.record.sm.al[1,1] + 120) )
@@ -115,21 +193,10 @@ exper.ard.kupfer    <- filter(exper.arduino, real_sec > (first.record.sm.cu[1,1]
 
 
 
-#Transform the mm into cm and add a column to the exper.ard.abstand
-
-
-if(grepl("[1-8]O[1-31]",plot.name)){
-  
-  colnames(exper.ard.abstand)[colnames(exper.ard.abstand)=="distance_mm"] <- "distance_cm"
-}else{
-  exper.ard.abstand <- exper.ard.abstand %>% transmute(distance_cm = distance_mm /10) %>% cbind(exper.ard.abstand)}
-
-
 
 ############################### WARNING ABOUT UNRECORDED ACTIVE STAGES FROM THE SP DATA ##################################
 
 # Set a warning that we had an arduino measurement that was not recorded with the SP data in between the different stages
-
 idle.time.exper.ard.abstand.before <- filter(exper.arduino, (real_sec <= (first.record.sm.ab[1,1] - 120)))
 idle.time.exper.ard.abstand.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.ab[1,1] + 120)) &  (real_sec <= (first.record.sm.al[1,1] - 120)))
 idle.time.exper.ard.abstand        <- rbind(idle.time.exper.ard.abstand.before,idle.time.exper.ard.abstand.after)
@@ -150,28 +217,6 @@ idle.time.exper.ard.kupfer        <- rbind(idle.time.exper.ard.kupfer.before,idl
 unrecorded.exper.ard.kupfer <- warnUnrecorded(idle.time.exper.ard.kupfer)
 
 
-
-# Function to check weather there is a measurement that hasn't been recorded
-warnUnrecorded <- function(df){
-  
- check<- any((df$matt_1 == 0 & df$matt_2 == 0 & df$matt_3 == 0 & df$matt_4 == 0 & df$matt_5 == 0) & df$measur_status == 1)
-
- 
- check<- any((df$matt_1 == 2 | df$matt_2 == 2 | df$matt_3 == 2 | df$matt_4 == 2 | df$matt_5 == 2) & df$measur_status == 1)
-
- 
- check<- any((df$matt_1 == 1 | df$matt_2 == 1 | df$matt_3 == 1 | df$matt_4 == 1 | df$matt_5 == 1) & df$measur_status == 1)
-   
- 
- return(check)
- 
- }
-
-
-
-
-
-
 ###################COMBINATION OF ARDUINO AND SMARTPEN DATA AND VISUALIZATION####################
 
 
@@ -185,45 +230,35 @@ warnUnrecorded <- function(df){
 
 
 
-# Extract only the columns we need from thee SP data for the Abstand
-
-visual.abstand <- filter(exper.abstand, Bezeichnung == 'Messung_Ab') 
-visual.abstand <- cbind(end_sec= visual.abstand$end_sec, Abstand..cm. = visual.abstand$Abstand..cm., 
-                        Benutzt.in.Ausw. = visual.abstand$Benutzt.in.Ausw.) %>% as.data.frame()
-
+# Extract only the columns we need from the SP data for the Abstand
+visual.aluminium<- filter(exper.aluminium, Bezeichnung == 'Messung_Al') 
+visual.aluminium <- cbind(end_sec= visual.aluminium$end_sec, Absorber.dicke..cm. = visual.aluminium$Absorber.dicke..cm., 
+                        Benutzt.in.Ausw. = visual.aluminium$Benutzt.in.Ausw.) %>% as.data.frame()
 
 
 #Divide the tables produced in the 4 different categories we are going to visualize
-
-visual.abstand.1    <- filter(visual.abstand, visual.abstand$Benutzt.in.Ausw. == 1)
-visual.abstand.0    <- filter(visual.abstand, visual.abstand$Benutzt.in.Ausw. == 0)
-exper.ard.abstand.1 <- filter(exper.ard.abstand, exper.ard.abstand$measur_status == 1)
-exper.ard.abstand.0 <- filter(exper.ard.abstand, exper.ard.abstand$measur_status == 0)
-
-
-
-# Correct the fluctating values
-
-# temp1<-unique(exper.ard.abstand.1$distance_cm) %>% as.data.frame()
+visual.aluminium.1    <- filter(visual.aluminium, visual.aluminium$Benutzt.in.Ausw. == 1)
+visual.aluminium.0    <- filter(visual.aluminium, visual.aluminium$Benutzt.in.Ausw. == 0)
+exper.ard.aluminium.1 <- filter(exper.ard.aluminium, exper.ard.aluminium$measur_status == 1)
+exper.ard.aluminium.0 <- filter(exper.ard.aluminium, exper.ard.aluminium$measur_status == 0)
 
 
 
-
+#Illustrate the results via a plot
 p <- ggplot() +
-  
+  # name of the plot
   ggtitle(plot.name) +
   # inactive periods
-  geom_point(data = exper.ard.abstand.0, aes(x= real_sec, y= distance_cm),   colour = 'blue', shape = 15, size = 0.5) + 
+  geom_point(data = exper.ard.aluminium.0, aes(x= real_sec, y= dicke_ges),   colour = 'blue', shape = 15, size = 0.5) + 
   # active periods
-  geom_point(data = exper.ard.abstand.1, aes(x= real_sec, y= distance_cm),   colour = 'coral', shape = 15, size = 0.5 ) +  
+  geom_point(data = exper.ard.aluminium.1, aes(x= real_sec, y= dicke_ges),   colour = 'coral', shape = 15, size = 0.5 ) +  
   # measurements not considered
-  geom_point(data = visual.abstand.0,    aes(x= end_sec, y= Abstand..cm.),   colour = 'red', shape = 10, size = 10 ) + 
+  geom_point(data = visual.aluminium.0,    aes(x= end_sec, y= Absorber.dicke..cm.),   colour = 'red', shape = 10, size = 10 ) + 
   # measurements considered
-  geom_point(data = visual.abstand.1,    aes(x = end_sec, y = Abstand..cm.), colour = 'green', shape = 10, size = 10 )+
+  geom_point(data = visual.aluminium.1,    aes(x = end_sec, y = Absorber.dicke..cm.), colour = 'green', shape = 10, size = 10 )+
   # The limits (strart and finish) of y axes which are discrete values
-  scale_y_continuous(name ="Abstand in cm",expand=c(0,0),limits = c(0,40)) +        
+  scale_y_continuous(name ="Dicke in mm",expand=c(0,0),limits = c(0,max(exper.ard.aluminium$dicke_ges)+0.06)) +        
   scale_x_continuous(name ="Versuchszeit in Sekunden")
-  
 
 
 
@@ -232,14 +267,5 @@ plot.name=paste(plot.name, ".jpg")
 ggsave(plot.name, plot = last_plot(),width = 7, height = 3 )
 
 
-# library(png)
-# library(ggplot2)
-# library(gridGraphics)
-# 
-# img1 <- readPNG("pencil.png")
-# g1 <- rasterGrob(img1, interpolate=FALSE)
-# qplot(1:10, 1:10, geom="blank") + 
-#   annotation_custom(g1, xmin=1, xmax=2, ymin=1, ymax=2) +
-#   geom_point()
-#   
-  
+
+

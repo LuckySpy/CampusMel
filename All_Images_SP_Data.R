@@ -113,9 +113,9 @@ total.time.stages <- transform(total.time.stages, duration = total.time.stages$e
 exper.stages.table$stage <- 0
 exper.stages.table$stage <- exper.stages.table$Bezeichnung
 
-exper.stages.table$stage <- gsub(".*_Ab_.*"                 , "1. Teilversuch:\nAbstand"       ,exper.stages.table$stage)
-exper.stages.table$stage <- gsub(".*_Al_.*"                 , "2. Teilversuch:\nAluminium"     ,exper.stages.table$stage)
-exper.stages.table$stage <- gsub(".*_Cu_.*"                 , "3. Teilversuch:\nKupfer"        ,exper.stages.table$stage)
+exper.stages.table$stage <- gsub(".*_Ab_.*"                 , "Teilversuch:\nAbstand"       ,exper.stages.table$stage)
+exper.stages.table$stage <- gsub(".*_Al_.*"                 , "Teilversuch:\nAluminium"     ,exper.stages.table$stage)
+exper.stages.table$stage <- gsub(".*_Cu_.*"                 , "Teilversuch:\nKupfer"        ,exper.stages.table$stage)
 exper.stages.table$stage <- gsub(".*Vorbesprechung*"        , "Vorbesprechung",exper.stages.table$stage)
 exper.stages.table$stage <- gsub("Vergleich_Proportional.*" , "Vergleich"    ,exper.stages.table$stage)
 
@@ -142,7 +142,7 @@ exper.stages.table <-exper.stages.table[!grepl("Erkl.*rung"         ,   exper.st
 
 
 # Convert stages and substages to factor so we can customize their levels. It will be needed for the visualization
-exper.stages.table$stage = factor(exper.stages.table$stage,levels         = c('Vorbesprechung','1. Teilversuch:\nAbstand','2. Teilversuch:\nAluminium','3. Teilversuch:\nKupfer','Vergleich'))
+exper.stages.table$stage = factor(exper.stages.table$stage,levels         = c('Vorbesprechung','Teilversuch:\nAbstand','Teilversuch:\nAluminium','Teilversuch:\nKupfer','Vergleich'))
 exper.stages.table$sub.stage = factor(exper.stages.table$sub.stage,levels = c('Vorbesprechung', 'Auswertung', 'Zeichnung', 'Berechnung', 'Messung', 'Vergleich'))
 
 
@@ -166,7 +166,7 @@ colScale <- scale_colour_manual(name = "sub.stage",values = myColors)
    ggtitle(plot.name) +                                                                         # Adding the plot name
    scale_y_discrete(name ="Arbeitsschritte", expand = c(0,1.1)) +                               # The limits (strart and finish) and scaling of y axes which are discrete values 
    scale_x_continuous(name ="Versuchszeit in Sekunden",expand = c(0, 0), 
-                      limits = c(0,exper.stages.table$end_sec[nrow(exper.stages.table)]+100))+  # The limits of the x axes which is a continuous value (sec)
+                      limits = c(0,max(exper.stages.table$end_sec)+100))+                       # The limits of the x axes which is a continuous value (sec)
    theme(legend.position = "None") +                                                            # No legend for the visualization
    geom_segment(aes(x = start_sec, y = sub.stage, xend = end_sec, yend = sub.stage,             # Type of visualizaiton which is segment
                     color = sub.stage, size = 4)) +
@@ -180,7 +180,7 @@ colScale <- scale_colour_manual(name = "sub.stage",values = myColors)
  
  
  #Saving the plot in pdf file
- plot.name = paste(plot.name, ".jpg", sep ="")
+ plot.name = paste(plot.name,'_SP',".jpg", sep ="")
  ggsave(plot.name, plot = last_plot(), path = image.directory, width = 8, height = 4)
  
 }}

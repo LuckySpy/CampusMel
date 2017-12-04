@@ -122,8 +122,12 @@ visualizeAB<-function(directory.name, file.name.SP, file.name.AR, plot.name, ima
     
     #Transform the mm into cm and add a column to the exper.ard.abstand
     
-    exper.ard.abstand <- exper.ard.abstand %>% transmute(distance_cm = distance_mm /10) %>% cbind(exper.ard.abstand)
-  
+    
+    if(grepl("[1-8]O[1-31]",plot.name)){
+      
+      colnames(exper.ard.abstand)[colnames(exper.ard.abstand)=="distance_mm"] <- "distance_cm"
+    }else{
+      exper.ard.abstand <- exper.ard.abstand %>% transmute(distance_cm = distance_mm /10) %>% cbind(exper.ard.abstand)}  
    
     
     ###################COMBINATION OF ARDUINO AND SMARTPEN DATA AND VISUALIZATION####################
@@ -184,7 +188,7 @@ visualizeAB<-function(directory.name, file.name.SP, file.name.AR, plot.name, ima
 
 
     #saving the plot in pdf file
-    plot.name=paste(plot.name, ".jpg")
+    plot.name=paste(plot.name,'_AB', ".jpg")
     ggsave(plot.name, plot = last_plot(), path = image.directory)
 
 
