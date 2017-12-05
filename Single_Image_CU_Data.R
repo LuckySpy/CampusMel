@@ -3,7 +3,7 @@ library(tidyverse)
 library(data.table)
 library(lubridate)
 library(stringr)
-
+library(png)
 
 
 ################### THE TABLES TO BE COMBINED FROM SP DATA AND ARDUINO #############################################
