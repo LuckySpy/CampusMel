@@ -69,7 +69,7 @@ warnUnrecorded <- function(df){
 #  We load the csv data from SP and arduino
 experiment    <- fread('./Daten/voll/1N16/1N16_SP.csv')
 exper.arduino <- read.csv('./Daten/voll/1N16/1N16_AR.csv', sep = ";")
-plot.name  <-"1N16_AR"
+plot.name  <-"1N16"
 
 
 # we take only the rows that have actual data
@@ -263,8 +263,8 @@ p <- ggplot() +
 
 
 #saving the plot in pdf file
-plot.name=paste(plot.name, ".jpg")
-ggsave(plot.name, plot = last_plot(),width = 7, height = 3 )
+plot.name=paste(plot.name,'_AL',".jpg")
+ggsave(plot.name, plot = last_plot(), width = 7, height = 3,path = './Bilder/MessverlaufAL')
 
 
 

@@ -5,12 +5,11 @@ library(stringr)
 library(lubridate)
 
 
-  # file.name<-"./Daten/voll/1N16/1N16_SP.csv"
-  # plot.name<-"1N16_SP"
-  # 
-  
-  file.name<-"1D19_SP.csv"
-  plot.name<-"1D19_SP"
+
+ #  We load the csv data from SP and arduino
+ experiment    <- fread('./Daten/voll/1D19/1D19_SP.csv')
+ exper.arduino <- fread('./Daten/voll/1D19/1D19_AR.csv')
+ plot.name  <-"1D19"
   
   
   
@@ -117,9 +116,9 @@ library(lubridate)
     exper.stages.table$stage <- 0
     exper.stages.table$stage <- exper.stages.table$Bezeichnung
     
-    exper.stages.table$stage <- gsub(".*_Ab_.*"                 , "1. Teilversuch:\nAbstand"       ,exper.stages.table$stage)
-    exper.stages.table$stage <- gsub(".*_Al_.*"                 , "2. Teilversuch:\nAluminium"     ,exper.stages.table$stage)
-    exper.stages.table$stage <- gsub(".*_Cu_.*"                 , "3. Teilversuch:\nKupfer"        ,exper.stages.table$stage)
+    exper.stages.table$stage <- gsub(".*_Ab_.*"                 , "Teilversuch:\nAbstand"       ,exper.stages.table$stage)
+    exper.stages.table$stage <- gsub(".*_Al_.*"                 , "Teilversuch:\nAluminium"     ,exper.stages.table$stage)
+    exper.stages.table$stage <- gsub(".*_Cu_.*"                 , "Teilversuch:\nKupfer"        ,exper.stages.table$stage)
     exper.stages.table$stage <- gsub(".*Vorbesprechung*"        , "Vorbesprechung",exper.stages.table$stage)
     exper.stages.table$stage <- gsub("Vergleich_Proportional.*" , "Vergleich"    ,exper.stages.table$stage)
     
@@ -146,7 +145,7 @@ library(lubridate)
     
     
     # Convert stages and substages to factor so we can customize their levels. It will be needed for the visualization
-    exper.stages.table$stage = factor(exper.stages.table$stage,levels         = c('Vorbesprechung','1. Teilversuch:\nAbstand','2. Teilversuch:\nAluminium','3. Teilversuch:\nKupfer','Vergleich'))
+    exper.stages.table$stage = factor(exper.stages.table$stage,levels         = c('Vorbesprechung','Teilversuch:\nAbstand','Teilversuch:\nAluminium','Teilversuch:\nKupfer','Vergleich'))
     exper.stages.table$sub.stage = factor(exper.stages.table$sub.stage,levels = c('Vorbesprechung', 'Auswertung', 'Zeichnung', 'Berechnung', 'Messung', 'Vergleich'))
     
     
@@ -184,7 +183,7 @@ library(lubridate)
     
     
     #Saving the plot in pdf file
-    plot.name = paste(plot.name, ".jpg", sep ="")
+    plot.name = paste(plot.name,"_SP", ".jpg", sep ="")
     ggsave(plot.name, plot = last_plot(),width = 8, height = 4 )
     
  

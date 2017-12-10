@@ -3,7 +3,6 @@ library(tidyverse)
 library(data.table)
 library(lubridate)
 library(stringr)
-library(png)
 
 
 ################### THE TABLES TO BE COMBINED FROM SP DATA AND ARDUINO #############################################
@@ -67,9 +66,9 @@ warnUnrecorded <- function(df){
 
 
 #  We load the csv data from SP and arduino
-experiment    <- fread('./Daten/voll/1N16/1N16_SP.csv')
-exper.arduino <- read.csv('./Daten/voll/1N16/1N16_AR.csv', sep = ";")
-plot.name  <-"1N16"
+experiment    <- fread('./Daten/voll/1D05/1D05_SP.csv')
+exper.arduino <- read.csv('./Daten/voll/1D05/1D05_AR.csv', sep = ";")
+plot.name  <-"1D05"
 
 
 # we take only the rows that have actual data
@@ -127,17 +126,16 @@ exper.aluminium <-exper.steps.table.ind[grepl(".*_Al",   exper.steps.table.ind$B
 exper.kupfer    <-exper.steps.table.ind[grepl(".*_Cu",   exper.steps.table.ind$Bezeichnung),]
 
 
-
-
 # The first and last recordings of the stages(Ab, Al, Cu) based on the smart pen data
-first.record.sm.ab <- select(exper.abstand,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Ab') %>% select(end_sec) %>% head(n=1) 
-last.record.sm.ab  <- select(exper.abstand,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Ab') %>% select(end_sec) %>% tail(n=1)
+first.record.sm.ab <- min(exper.abstand$end_sec)
+last.record.sm.ab  <- max(exper.abstand$end_sec)
 
-first.record.sm.al <- select(exper.aluminium,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Al') %>% select(end_sec) %>% head(n=1)
-last.record.sm.al  <- select(exper.aluminium,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Al') %>% select(end_sec) %>% tail(n=1)
+first.record.sm.al <- min(exper.aluminium$end_sec)
+last.record.sm.al  <- max(exper.aluminium$end_sec)
 
-first.record.sm.cu <- select(exper.kupfer,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Cu') %>% select(end_sec) %>% head(n=1)
-last.record.sm.cu  <- select(exper.kupfer,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Cu') %>% select(end_sec) %>% tail(n=1)
+first.record.sm.cu <- min(exper.kupfer$end_sec)
+last.record.sm.cu  <- max(exper.kupfer$end_sec)
+
 
 
 
@@ -185,11 +183,11 @@ exper.arduino$dicke_ges <-  rowSums(thik_table[, c(1, 2, 3, 4, 5)])
 
 
 # Select only the rows of the individual stages(abstand 0, aluminium 2, Kupfer 1) and put them in separate tables table
-exper.ard.abstand   <- filter(exper.arduino, real_sec > (first.record.sm.ab[1,1] - 120)  &  (real_sec < last.record.sm.ab[1,1] + 120) )
+exper.ard.abstand   <- filter(exper.arduino, real_sec > (first.record.sm.ab - 120)  &  (real_sec < last.record.sm.ab + 120) )
 
-exper.ard.aluminium <- filter(exper.arduino, real_sec > (first.record.sm.al[1,1] - 120)  &  (real_sec < last.record.sm.al[1,1] + 120) )
+exper.ard.aluminium <- filter(exper.arduino, real_sec > (first.record.sm.al - 120)  &  (real_sec < last.record.sm.al + 120) )
 
-exper.ard.kupfer    <- filter(exper.arduino, real_sec > (first.record.sm.cu[1,1] - 120)  &  (real_sec < last.record.sm.cu[1,1] + 120) )
+exper.ard.kupfer    <- filter(exper.arduino, real_sec > (first.record.sm.cu - 120)  &  (real_sec < last.record.sm.cu + 120) )
 
 
 
@@ -197,21 +195,21 @@ exper.ard.kupfer    <- filter(exper.arduino, real_sec > (first.record.sm.cu[1,1]
 ############################### WARNING ABOUT UNRECORDED ACTIVE STAGES FROM THE SP DATA ##################################
 
 # Set a warning that we had an arduino measurement that was not recorded with the SP data in between the different stages
-idle.time.exper.ard.abstand.before <- filter(exper.arduino, (real_sec <= (first.record.sm.ab[1,1] - 120)))
-idle.time.exper.ard.abstand.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.ab[1,1] + 120)) &  (real_sec <= (first.record.sm.al[1,1] - 120)))
+idle.time.exper.ard.abstand.before <- filter(exper.arduino, (real_sec <= (first.record.sm.ab - 120)))
+idle.time.exper.ard.abstand.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.ab + 120)) &  (real_sec <= (first.record.sm.al - 120)))
 idle.time.exper.ard.abstand        <- rbind(idle.time.exper.ard.abstand.before,idle.time.exper.ard.abstand.after)
 
 unrecorded.exper.ard.abstand <- warnUnrecorded(idle.time.exper.ard.abstand)
 
 
-idle.time.exper.ard.aluminium.before <- filter(exper.arduino, (real_sec >= (last.record.sm.ab[1,1] + 120)) & (real_sec <= (first.record.sm.al[1,1] - 120)))
-idle.time.exper.ard.aluminium.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.al[1,1] + 120)) & (real_sec <= (first.record.sm.cu[1,1] - 120)))
+idle.time.exper.ard.aluminium.before <- filter(exper.arduino, (real_sec >= (last.record.sm.ab + 120)) & (real_sec <= (first.record.sm.al - 120)))
+idle.time.exper.ard.aluminium.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.al + 120)) & (real_sec <= (first.record.sm.cu - 120)))
 idle.time.exper.ard.aluminium        <- rbind(idle.time.exper.ard.aluminium.before,idle.time.exper.ard.aluminium.after)
 
 unrecorded.exper.ard.aluminium <- warnUnrecorded(idle.time.exper.ard.aluminium)
 
-idle.time.exper.ard.kupfer.before <- filter(exper.arduino, (real_sec >= (last.record.sm.al[1,1] + 120)) &  (real_sec <= (first.record.sm.cu[1,1] - 120)))
-idle.time.exper.ard.kupfer.after  <- filter(exper.arduino, (real_sec > (last.record.sm.cu[1,1] + 120)))
+idle.time.exper.ard.kupfer.before <- filter(exper.arduino, (real_sec >= (last.record.sm.al + 120)) &  (real_sec <= (first.record.sm.cu - 120)))
+idle.time.exper.ard.kupfer.after  <- filter(exper.arduino, (real_sec > (last.record.sm.cu + 120)))
 idle.time.exper.ard.kupfer        <- rbind(idle.time.exper.ard.kupfer.before,idle.time.exper.ard.kupfer.after)
 
 unrecorded.exper.ard.kupfer <- warnUnrecorded(idle.time.exper.ard.kupfer)
@@ -263,10 +261,8 @@ p <- ggplot() +
 
 
 #saving the plot in pdf file
-plot.name=paste(plot.name, ".jpg")
-ggsave(plot.name, plot = last_plot(),width = 7, height = 3 )
-
-
+plot.name=paste(plot.name,'_CU',".jpg")
+ggsave(plot.name, plot = last_plot(), width = 7, height = 3, path = './Bilder/MessverlaufCU')
 
 
 

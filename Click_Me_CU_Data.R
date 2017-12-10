@@ -27,7 +27,7 @@ for(i in 1:length(directory.name)){
   plot.name.CU <- directory.name[i]
   
   
-  if(i!=737 | i!=740){
+  if(i!=737){
     
     visualizeCU(dn, dfnSP, dfnAR , plot.name.CU, image.dir)
   }

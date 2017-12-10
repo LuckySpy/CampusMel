@@ -9,15 +9,30 @@ library(stringr)
 ################### THE TABLES TO BE COMBINED FROM SP DATA AND ARDUINO #############################################
 
 
-#load the vlues from the specific directory
+# Function to check weather there is a measurement that hasn't been recorded
+warnUnrecorded <- function(df){
+  
+  check<- any((df$matt_1 == 0 & df$matt_2 == 0 & df$matt_3 == 0 & df$matt_4 == 0 & df$matt_5 == 0) & df$measur_status == 1)
+  
+  
+  check<- any((df$matt_1 == 2 | df$matt_2 == 2 | df$matt_3 == 2 | df$matt_4 == 2 | df$matt_5 == 2) & df$measur_status == 1)
+  
+  
+  check<- any((df$matt_1 == 1 | df$matt_2 == 1 | df$matt_3 == 1 | df$matt_4 == 1 | df$matt_5 == 1) & df$measur_status == 1)
+  
+  
+  return(check)
+  
+}
+
 
 
 
 
 #  We load the csv data from SP and arduino
-experiment    <- fread('./Daten/voll/1N16/1N16_SP.csv')
-exper.arduino <- fread('./Daten/voll/1N16/1N16_AR.csv')
-plot.name  <-"1N16_AR"
+experiment    <- fread('./Daten/voll/4D12/4D12_SP.csv')
+exper.arduino <- fread('./Daten/voll/4D12/4D12_AR.csv')
+plot.name  <-"4D12"
 
 
 # we take only the rows that have actual data
@@ -37,7 +52,6 @@ task.time.diff  <- as.data.frame(as.numeric(difftime(temp2, temp1, units = "sec"
 
 
 # We calculate the time in sec using hms(hours minutes second the seconds of the beginning and ending)
-
 task.time.strt <- as.data.frame(as.numeric(as.period(hms(experiment$Anfang_0), unit = "sec")))
 task.time.end  <- as.data.frame(as.numeric(as.period(hms(experiment$Ende_0),   unit = "sec")))
 
@@ -83,16 +97,25 @@ exper.kupfer    <-exper.steps.table.ind[grepl(".*_Cu",   exper.steps.table.ind$B
 
 # The first and last recordings of the stages(Ab, Al, Cu) based on the smart pen data
 
-first.record.sm.ab <- select(exper.abstand,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Ab') %>% select(end_sec) %>% head(n=1) 
-last.record.sm.ab  <- select(exper.abstand,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Ab') %>% select(end_sec) %>% tail(n=1)
+# first.record.sm.ab <- select(exper.abstand,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Ab') %>% select(end_sec) %>% head(n=1) 
+# last.record.sm.ab  <- select(exper.abstand,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Ab') %>% select(end_sec) %>% tail(n=1)
+# 
+# first.record.sm.al <- select(exper.aluminium,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Al') %>% select(end_sec) %>% head(n=1)
+# last.record.sm.al  <- select(exper.aluminium,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Al') %>% select(end_sec) %>% tail(n=1)
+# 
+# first.record.sm.cu <- select(exper.kupfer,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Cu') %>% select(end_sec) %>% head(n=1)
+# last.record.sm.cu  <- select(exper.kupfer,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Cu') %>% select(end_sec) %>% tail(n=1)
 
-first.record.sm.al <- select(exper.aluminium,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Al') %>% select(end_sec) %>% head(n=1)
-last.record.sm.al  <- select(exper.aluminium,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Al') %>% select(end_sec) %>% tail(n=1)
-
-first.record.sm.cu <- select(exper.kupfer,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Cu') %>% select(end_sec) %>% head(n=1)
-last.record.sm.cu  <- select(exper.kupfer,Bezeichnung,end_sec) %>% filter( Bezeichnung == 'Messung_Cu') %>% select(end_sec) %>% tail(n=1)
 
 
+first.record.sm.ab <- min(exper.abstand$end_sec)
+last.record.sm.ab  <- max(exper.abstand$end_sec)
+
+first.record.sm.al <- min(exper.aluminium$end_sec)
+last.record.sm.al  <- max(exper.aluminium$end_sec)
+
+first.record.sm.cu <- min(exper.kupfer$end_sec)
+last.record.sm.cu  <- max(exper.kupfer$end_sec)
 
 
 
@@ -107,17 +130,15 @@ exper.arduino$real_sec <- 1:nrow(exper.arduino)
 # Select only the rows of the individual stages(abstand 0, aluminium 2, Kupfer 1) and put them in separate tables table
 
 
-exper.ard.abstand   <- filter(exper.arduino, real_sec > (first.record.sm.ab[1,1] - 120)  &  (real_sec < last.record.sm.ab[1,1] + 120) )
+exper.ard.abstand   <- filter(exper.arduino, real_sec > (first.record.sm.ab - 120)  &  (real_sec < last.record.sm.ab + 120) )
 
-exper.ard.aluminium <- filter(exper.arduino, real_sec > (first.record.sm.al[1,1] - 120)  &  (real_sec < last.record.sm.al[1,1] + 120) )
+exper.ard.aluminium <- filter(exper.arduino, real_sec > (first.record.sm.al - 120)  &  (real_sec < last.record.sm.al + 120) )
 
-exper.ard.kupfer    <- filter(exper.arduino, real_sec > (first.record.sm.cu[1,1] - 120)  &  (real_sec < last.record.sm.cu[1,1] + 120) )
+exper.ard.kupfer    <- filter(exper.arduino, real_sec > (first.record.sm.cu - 120)  &  (real_sec < last.record.sm.cu + 120) )
 
 
 
 #Transform the mm into cm and add a column to the exper.ard.abstand
-
-
 if(grepl("[1-8]O[1-31]",plot.name)){
   
   colnames(exper.ard.abstand)[colnames(exper.ard.abstand)=="distance_mm"] <- "distance_cm"
@@ -126,46 +147,31 @@ if(grepl("[1-8]O[1-31]",plot.name)){
 
 
 
+
+
 ############################### WARNING ABOUT UNRECORDED ACTIVE STAGES FROM THE SP DATA ##################################
 
 # Set a warning that we had an arduino measurement that was not recorded with the SP data in between the different stages
 
-idle.time.exper.ard.abstand.before <- filter(exper.arduino, (real_sec <= (first.record.sm.ab[1,1] - 120)))
-idle.time.exper.ard.abstand.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.ab[1,1] + 120)) &  (real_sec <= (first.record.sm.al[1,1] - 120)))
+idle.time.exper.ard.abstand.before <- filter(exper.arduino, (real_sec <= (first.record.sm.ab - 120)))
+idle.time.exper.ard.abstand.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.ab + 120)) &  (real_sec <= (first.record.sm.al - 120)))
 idle.time.exper.ard.abstand        <- rbind(idle.time.exper.ard.abstand.before,idle.time.exper.ard.abstand.after)
 
 unrecorded.exper.ard.abstand <- warnUnrecorded(idle.time.exper.ard.abstand)
 
 
-idle.time.exper.ard.aluminium.before <- filter(exper.arduino, (real_sec >= (last.record.sm.ab[1,1] + 120)) & (real_sec <= (first.record.sm.al[1,1] - 120)))
-idle.time.exper.ard.aluminium.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.al[1,1] + 120)) & (real_sec <= (first.record.sm.cu[1,1] - 120)))
+idle.time.exper.ard.aluminium.before <- filter(exper.arduino, (real_sec >= (last.record.sm.ab + 120)) & (real_sec <= (first.record.sm.al - 120)))
+idle.time.exper.ard.aluminium.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.al + 120)) & (real_sec <= (first.record.sm.cu - 120)))
 idle.time.exper.ard.aluminium        <- rbind(idle.time.exper.ard.aluminium.before,idle.time.exper.ard.aluminium.after)
 
 unrecorded.exper.ard.aluminium <- warnUnrecorded(idle.time.exper.ard.aluminium)
 
-idle.time.exper.ard.kupfer.before <- filter(exper.arduino, (real_sec >= (last.record.sm.al[1,1] + 120)) &  (real_sec <= (first.record.sm.cu[1,1] - 120)))
-idle.time.exper.ard.kupfer.after  <- filter(exper.arduino, (real_sec > (last.record.sm.cu[1,1] + 120)))
+idle.time.exper.ard.kupfer.before <- filter(exper.arduino, (real_sec >= (last.record.sm.al + 120)) &  (real_sec <= (first.record.sm.cu - 120)))
+idle.time.exper.ard.kupfer.after  <- filter(exper.arduino, (real_sec > (last.record.sm.cu + 120)))
 idle.time.exper.ard.kupfer        <- rbind(idle.time.exper.ard.kupfer.before,idle.time.exper.ard.kupfer.after)
 
 unrecorded.exper.ard.kupfer <- warnUnrecorded(idle.time.exper.ard.kupfer)
 
-
-
-# Function to check weather there is a measurement that hasn't been recorded
-warnUnrecorded <- function(df){
-  
- check<- any((df$matt_1 == 0 & df$matt_2 == 0 & df$matt_3 == 0 & df$matt_4 == 0 & df$matt_5 == 0) & df$measur_status == 1)
-
- 
- check<- any((df$matt_1 == 2 | df$matt_2 == 2 | df$matt_3 == 2 | df$matt_4 == 2 | df$matt_5 == 2) & df$measur_status == 1)
-
- 
- check<- any((df$matt_1 == 1 | df$matt_2 == 1 | df$matt_3 == 1 | df$matt_4 == 1 | df$matt_5 == 1) & df$measur_status == 1)
-   
- 
- return(check)
- 
- }
 
 
 
@@ -179,9 +185,9 @@ warnUnrecorded <- function(df){
 
 # Extract the unique "real" distances during the active periods of the arduino
 
-# exp.distances <-  filter( exper.ard.abstand, measur_status==1) %>% unique()
-# exp.distances <- unique(exp.distances$distance_cm) %>% as.data.frame()
-# colnames(exp.distances)[1]<-"distances"
+exp.distances <-  filter( exper.ard.abstand, measur_status==1) %>% unique()
+exp.distances <- unique(exp.distances$distance_cm) %>% as.data.frame()
+colnames(exp.distances)[1]<-"distances"
 
 
 
@@ -228,18 +234,10 @@ p <- ggplot() +
 
 
 #saving the plot in pdf file
-plot.name=paste(plot.name, ".jpg")
-ggsave(plot.name, plot = last_plot(),width = 7, height = 3 )
+plot.name=paste(plot.name,'_AB',".jpg")
+#ggsave(plot.name, plot = last_plot(), width = 7, height = 3,path = './Bilder/MessverlaufAB')
 
+ggsave(plot.name, plot = last_plot(), width = 7, height = 3)
 
-# library(png)
-# library(ggplot2)
-# library(gridGraphics)
-# 
-# img1 <- readPNG("pencil.png")
-# g1 <- rasterGrob(img1, interpolate=FALSE)
-# qplot(1:10, 1:10, geom="blank") + 
-#   annotation_custom(g1, xmin=1, xmax=2, ymin=1, ymax=2) +
-#   geom_point()
-#   
+  
   

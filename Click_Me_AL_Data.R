@@ -27,7 +27,7 @@ for(i in 1:length(directory.name)){
   plot.name.AL <- directory.name[i]
   
   
-  if(i!=737 | i!=740){
+  if(i!=737){
     
     visualizeAL(dn, dfnSP, dfnAR , plot.name.AL, image.dir)
   }
