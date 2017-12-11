@@ -7,9 +7,9 @@ library(lubridate)
 
 
  #  We load the csv data from SP and arduino
- experiment    <- fread('./Daten/voll/1D19/1D19_SP.csv')
- exper.arduino <- fread('./Daten/voll/1D19/1D19_AR.csv')
- plot.name  <-"1D19"
+ experiment    <- fread('./Daten/voll/1N16/1N16_SP.csv')
+ exper.arduino <- fread('./Daten/voll/1N16/1N16_AR.csv')
+ plot.name  <-"1N16"
   
   
   
@@ -143,6 +143,15 @@ library(lubridate)
     exper.stages.table <-exper.stages.table[!grepl("Erkl.*rung"         ,   exper.stages.table$Bezeichnung),]
     
     
+    axes.limit<-max(exper.stages.table$end_sec)+100
+    #Add Vergleich in case there is not there
+    if(!any(exper.stages.table$stage=="Vergleich")){
+      
+      create.vergleich   <-data.frame(Bezeichnung ="Vergleich",start_sec = max(exper.stages.table$start_sec)+500, end_sec = max(exper.stages.table$start_sec)+501, duration = 1, stage = 'Vergleich', sub.stage = 'Vergleich')
+      exper.stages.table <- rbind(exper.stages.table,create.vergleich)
+       }
+    
+    
     
     # Convert stages and substages to factor so we can customize their levels. It will be needed for the visualization
     exper.stages.table$stage = factor(exper.stages.table$stage,levels         = c('Vorbesprechung','Teilversuch:\nAbstand','Teilversuch:\nAluminium','Teilversuch:\nKupfer','Vergleich'))
@@ -169,7 +178,7 @@ library(lubridate)
       ggtitle(plot.name) +                                                                         # Adding the plot name
       scale_y_discrete(name ="Arbeitsschritte", expand = c(0,1.2)) +                               # The limits (strart and finish) and scaling of y axes which are discrete values 
       scale_x_continuous(name ="Versuchszeit in Sekunden",expand = c(0, 0), 
-                         limits = c(0,max(exper.stages.table$end_sec)+100))+                       # The limits of the x axes which is a continuous value (sec)
+                         limits = c(0,axes.limit))+                       # The limits of the x axes which is a continuous value (sec)
       theme(legend.position = "None") +                                                            # No legend for the visualization
       geom_segment(aes(x = start_sec, y = sub.stage, xend = end_sec, yend = sub.stage,             # Type of visualizaiton which is segment
                        color = sub.stage, size = 4)) +

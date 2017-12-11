@@ -260,13 +260,13 @@ visualizeAL <-function(directory.name, file.name.SP, file.name.AR, plot.name, im
       # name of the plot
       ggtitle(plot.name) +
       # inactive periods
-      geom_point(data = exper.ard.aluminium.0, aes(x= real_sec, y= dicke_ges),   colour = 'blue', shape = 15, size = 0.5) + 
+      geom_point(data = exper.ard.aluminium.0, aes(x= real_sec, y= dicke_ges),   colour = '#3F3F3F', shape = 15, size = 0.5) + 
       # active periods
-      geom_point(data = exper.ard.aluminium.1, aes(x= real_sec, y= dicke_ges),   colour = 'coral', shape = 15, size = 0.5 ) +  
+      geom_point(data = exper.ard.aluminium.1, aes(x= real_sec, y= dicke_ges),   colour = '#6FDC6F', shape = 15, size = 0.5 ) +  
       # measurements not considered
-      geom_point(data = visual.aluminium.0,    aes(x= end_sec, y= Absorber.dicke..cm.),   colour = 'red', shape = 10, size = 10 ) + 
+      geom_point(data = visual.aluminium.0,    aes(x= end_sec, y= Absorber.dicke..cm.),   colour = '#CC071E', shape = 10, size = 10 ) + 
       # measurements considered
-      geom_point(data = visual.aluminium.1,    aes(x = end_sec, y = Absorber.dicke..cm.), colour = 'green', shape = 10, size = 10 )+
+      geom_point(data = visual.aluminium.1,    aes(x = end_sec, y = Absorber.dicke..cm.), colour = '#57AB27', shape = 10, size = 10 )+
       # The limits (strart and finish) of y axes which are discrete values
       scale_y_continuous(name ="Dicke in mm",expand=c(0,0),limits = c(0,max(exper.ard.aluminium$dicke_ges)+0.06)) +        
       scale_x_continuous(name ="Versuchszeit in Sekunden")

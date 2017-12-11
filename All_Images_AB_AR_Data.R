@@ -135,13 +135,13 @@ visualizeAB<-function(directory.name, file.name.SP, file.name.AR, plot.name, ima
     p <- ggplot() +
       ggtitle(plot.name) +    
       # inactive periods
-      geom_point(data = exper.ard.abstand.0, aes(x= real_sec, y= distance_cm),   colour = 'blue', shape = 15, size = 0.5) + 
+      geom_point(data = exper.ard.abstand.0, aes(x= real_sec, y= distance_cm),   colour = '#00549F', shape = 15, size = 0.5) + 
       # active periods
-      geom_point(data = exper.ard.abstand.1, aes(x= real_sec, y= distance_cm),   colour = 'coral', shape = 15, size = 0.5 ) +  
+      geom_point(data = exper.ard.abstand.1, aes(x= real_sec, y= distance_cm),   colour = '#6FDC6F', shape = 15, size = 0.5 ) +  
       # measurements not considered
-      geom_point(data = visual.abstand.0,    aes(x= end_sec, y= Abstand..cm.),   colour = 'red', shape = 10, size = 10 ) + 
+      geom_point(data = visual.abstand.0,    aes(x= end_sec, y= Abstand..cm.),   colour = '#CC071E', shape = 10, size = 10 ) + 
       # measurements considered
-      geom_point(data = visual.abstand.1,    aes(x = end_sec, y = Abstand..cm.), colour = 'green', shape = 10, size = 10 )+
+      geom_point(data = visual.abstand.1,    aes(x = end_sec, y = Abstand..cm.), colour = '#57AB27', shape = 10, size = 10 )+
       
       scale_y_continuous(name ="Abstand in cm",expand=c(0,0),limits = c(0,40)) +        # The limits (strart and finish) of y axes which are discrete values
       scale_x_continuous(name ="Versuchszeit in Sekunden")

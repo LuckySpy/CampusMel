@@ -24,12 +24,7 @@ temp1           <- strptime(experiment$Anfang_0, "%H:%M:%S")
 temp2           <- strptime(experiment$Ende_0, "%H:%M:%S")
 task.time.diff  <- as.data.frame(as.numeric(difftime(temp2, temp1, units = "sec")))
 
-  
-
-
 # From library lubridate we calculate using hms(hourss minutes second the seconds of the beginning and ending)
-
-
 task.time.strt <- as.data.frame(as.numeric(as.period(hms(experiment$Anfang_0), unit = "sec"))) # Convert the hour minnute second to seconds for the corresponding column
 task.time.end  <- as.data.frame(as.numeric(as.period(hms(experiment$Ende_0),   unit = "sec"))) # Convert the hour minnute second to seconds for the corresponding column
 
@@ -108,8 +103,6 @@ total.time.stages <- transform(total.time.stages, duration = total.time.stages$e
 
 
 #Create categories so that we can distinguish between the results on the plots
-
-
 exper.stages.table$stage <- 0
 exper.stages.table$stage <- exper.stages.table$Bezeichnung
 
@@ -120,9 +113,7 @@ exper.stages.table$stage <- gsub(".*Vorbesprechung*"        , "Vorbesprechung",e
 exper.stages.table$stage <- gsub("Vergleich_Proportional.*" , "Vergleich"    ,exper.stages.table$stage)
 
 
-
 #Create column substages so that we can use the labels for the visualization
-
 exper.stages.table$sub.stage <- 0
 exper.stages.table$sub.stage <- exper.stages.table$Bezeichnung
 
@@ -132,13 +123,18 @@ exper.stages.table$sub.stage <- gsub("Zeichnung_.*"             , "Zeichnung" ,e
 exper.stages.table$sub.stage <- gsub("Berechnung_.*"            , "Berechnung",exper.stages.table$sub.stage)
 exper.stages.table$sub.stage <- gsub("Vergleich_Proportional.*" , "Vergleich",exper.stages.table$sub.stage)
 
-
-
-
 #Remove the rows of the data table we do not need using !grepl pattern matching and replacement 
 exper.stages.table <-exper.stages.table[!grepl("Zeichnung_.*_Gerade",   exper.stages.table$Bezeichnung),]
 exper.stages.table <-exper.stages.table[!grepl("Erkl.*rung"         ,   exper.stages.table$Bezeichnung),]
 
+
+axes.limit <-max(exper.stages.table$end_sec)+100
+#Add Vergleich in case there is not there
+if(!any(exper.stages.table$stage=="Vergleich")){
+  
+  create.vergleich   <-data.frame(Bezeichnung ="Vergleich",start_sec = max(exper.stages.table$start_sec)+500, end_sec = max(exper.stages.table$start_sec)+501, duration = 1, stage = 'Vergleich', sub.stage = 'Vergleich')
+  exper.stages.table <- rbind(exper.stages.table,create.vergleich)
+}
 
 
 # Convert stages and substages to factor so we can customize their levels. It will be needed for the visualization
@@ -166,7 +162,7 @@ colScale <- scale_colour_manual(name = "sub.stage",values = myColors)
    ggtitle(plot.name) +                                                                         # Adding the plot name
    scale_y_discrete(name ="Arbeitsschritte", expand = c(0,1.1)) +                               # The limits (strart and finish) and scaling of y axes which are discrete values 
    scale_x_continuous(name ="Versuchszeit in Sekunden",expand = c(0, 0), 
-                      limits = c(0,max(exper.stages.table$end_sec)+100))+                       # The limits of the x axes which is a continuous value (sec)
+                      limits = c(0,axes.limit))+                       # The limits of the x axes which is a continuous value (sec)
    theme(legend.position = "None") +                                                            # No legend for the visualization
    geom_segment(aes(x = start_sec, y = sub.stage, xend = end_sec, yend = sub.stage,             # Type of visualizaiton which is segment
                     color = sub.stage, size = 4)) +
