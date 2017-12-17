@@ -11,7 +11,7 @@ library(stringr)
 #Functions to be used
 thiknify <- function (matt, track, exp.num)
 {
-  if (matt == 1 & (exp.num %% 2 == 1 | exp.num == 8)){
+  if (matt == 1 & (exp.num == 1 |exp.num == 3 | exp.num == 7 | exp.num == 8)){
     switch(track,
            0.003,
            0.005,
@@ -21,7 +21,7 @@ thiknify <- function (matt, track, exp.num)
     )
   }
   
-  else if(matt == 1 & (exp.num %% 2 == 0)) {
+  else if(matt == 1 & (exp.num == 2 |exp.num == 4 | exp.num == 5)) {
     switch(track,
            0.0025,
            0.005,
@@ -63,9 +63,9 @@ warnUnrecorded <- function(df){
 
 
 #  We load the csv data from SP and arduino
-experiment    <- fread('./Daten/voll/1D06/1D06_SP.csv')
-exper.arduino <- read.csv('./Daten/voll/1D06/1D06_AR.csv', sep = ";")
-plot.name  <-"1D06"
+experiment    <- fread('./Daten/voll/4J17/4J17_SP.csv')
+exper.arduino <- read.csv('./Daten/voll/4J17/4J17_AR.csv', sep = ";")
+plot.name  <-"4J17"
 
 
 # we take only the rows that have actual data

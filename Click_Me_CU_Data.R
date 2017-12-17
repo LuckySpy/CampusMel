@@ -4,7 +4,7 @@ library(data.table)
 library(stringr)
 library(lubridate)
 
-source("All_Images_CU_AR_Data.R")
+source("All_Images_Copper.R")
 
 experiment.number <- as.character(c(1:8))
 experiment.month  <-c("O","N","D","J","F")

@@ -26,9 +26,9 @@ warnUnrecorded <- function(df){
 
 
 #  We load the csv data from SP and arduino
-experiment    <- fread('./Daten/voll/4D12/4D12_SP.csv')
-exper.arduino <- fread('./Daten/voll/4D12/4D12_AR.csv')
-plot.name  <-"4D12"
+experiment    <- read.csv('./Daten/voll/1D19/1D19_SP.csv',sep = ";")
+exper.arduino <- fread('./Daten/voll/1D19/1D19_AR.csv')
+plot.name  <-"1D19"
 
 
 # we take only the rows that have actual data

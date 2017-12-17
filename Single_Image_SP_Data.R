@@ -51,8 +51,6 @@ library(lubridate)
     #Conditional choice of specific rows that do not have NA values
     exper.stages.table <-temp[!(is.na(temp$duration) ), ]
     
-    
-    
     #Remove the rows of the data table we do not need using !grepl pattern matching and replacement 
     exper.stages.table <-exper.stages.table[!grepl(".*_Achse",   exper.stages.table$Bezeichnung),]
     exper.stages.table <-exper.stages.table[!grepl(".*x_Gr.*e",  exper.stages.table$Bezeichnung),]
@@ -61,8 +59,6 @@ library(lubridate)
     exper.stages.table <-exper.stages.table[!grepl(".*_Skala",   exper.stages.table$Bezeichnung),]
     exper.stages.table <-exper.stages.table[!grepl(".*_Zahlen",  exper.stages.table$Bezeichnung),]
     exper.stages.table <-exper.stages.table[!grepl("Zeichnung_.*_Gerade",  exper.stages.table$Bezeichnung),]
-    
-    
     
     
     
@@ -108,11 +104,7 @@ library(lubridate)
     total.time.stages <- transform(total.time.stages, duration = total.time.stages$end_sec - total.time.stages$start_sec )
     
     
-    
-    
     #Create categories so that we can distinguish between the results on the plots
-    
-    
     exper.stages.table$stage <- 0
     exper.stages.table$stage <- exper.stages.table$Bezeichnung
     
@@ -125,7 +117,6 @@ library(lubridate)
     
     
     #Create column substages so that we can use the labels for the visualization
-    
     exper.stages.table$sub.stage <- 0
     exper.stages.table$sub.stage <- exper.stages.table$Bezeichnung
     

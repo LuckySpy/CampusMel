@@ -1,10 +1,7 @@
-
 library(tidyverse)
 library(data.table)
 library(lubridate)
 library(stringr)
-
-
 
 ################### THE TABLES TO BE COMBINED FROM SP DATA AND ARDUINO #############################################
 
@@ -58,26 +55,19 @@ warnUnrecorded <- function(df){
 
 
 #  We load the csv data from SP and arduino
-experiment    <- fread('./Daten/voll/6N15/6N15_SP.csv')
-exper.arduino <- read.csv('./Daten/voll/6N15/6N15_AR.csv', sep = ";")
-plot.name  <-"6N15"
-
+experiment    <- fread('./Daten/voll/3J24/3J24_SP.csv')
+exper.arduino <- read.csv('./Daten/voll/3J24/3J24_AR.csv', sep = ";")
+plot.name  <-"3J24"
 
 # we take only the rows that have actual data
 experiment$Bezeichnung <- as.character(experiment$Bezeichnung)
 experiment             <- subset(experiment, nchar(experiment$Bezeichnung)> 0)
-
-
-
 
 # #We have to try to visualize the time for each one of the different parts of the data from the smart pen
 # #what we visualize is the start and the ending point
 temp1           <- strptime(experiment$Anfang_0, "%H:%M:%S")
 temp2           <- strptime(experiment$Ende_0, "%H:%M:%S")
 task.time.diff  <- as.data.frame(as.numeric(difftime(temp2, temp1, units = "sec")))
-
-
-
 
 # We calculate the time in sec using hms(hours minutes second the seconds of the beginning and ending)
 task.time.strt <- as.data.frame(as.numeric(as.period(hms(experiment$Anfang_0), unit = "sec")))
@@ -89,8 +79,6 @@ colnames(task.time.diff)[1] <- ("duration")
 
 temp               <- cbind(experiment$Bezeichnung, task.time.strt, task.time.end, task.time.diff)
 colnames(temp)[1]  <- ("Bezeichnung")
-
-
 #################### Process the table so we can have data we need for each individual stage of the experiment##########################
 
 

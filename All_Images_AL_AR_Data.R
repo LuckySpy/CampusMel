@@ -57,22 +57,20 @@ visualizeAL <-function(directory.name, file.name.SP, file.name.AR, plot.name, im
     
     
     # Function to check weather there is a measurement that hasn't been recorded
-    warnUnrecorded <- function(df){
-      
-      check<- any((df$matt_1 == 0 & df$matt_2 == 0 & df$matt_3 == 0 & df$matt_4 == 0 & df$matt_5 == 0) & df$measur_status == 1)
-      
-      
-      check<- any((df$matt_1 == 2 | df$matt_2 == 2 | df$matt_3 == 2 | df$matt_4 == 2 | df$matt_5 == 2) & df$measur_status == 1)
-      
-      
-      check<- any((df$matt_1 == 1 | df$matt_2 == 1 | df$matt_3 == 1 | df$matt_4 == 1 | df$matt_5 == 1) & df$measur_status == 1)
-      
-      
-      return(check)
-      
-    }
-    
-    
+    # warnUnrecorded <- function(df){
+    #   
+    #   check<- any((df$matt_1 == 0 & df$matt_2 == 0 & df$matt_3 == 0 & df$matt_4 == 0 & df$matt_5 == 0) & df$measur_status == 1)
+    #   
+    #   
+    #   check<- any((df$matt_1 == 2 | df$matt_2 == 2 | df$matt_3 == 2 | df$matt_4 == 2 | df$matt_5 == 2) & df$measur_status == 1)
+    #   
+    #   
+    #   check<- any((df$matt_1 == 1 | df$matt_2 == 1 | df$matt_3 == 1 | df$matt_4 == 1 | df$matt_5 == 1) & df$measur_status == 1)
+    #   
+    #   
+    #   return(check)
+    #   
+    # }
     
     
     #  We load the csv data from SP and arduino
@@ -202,44 +200,31 @@ visualizeAL <-function(directory.name, file.name.SP, file.name.AR, plot.name, im
     
     
     
-
-    
-    
     ############################### WARNING ABOUT UNRECORDED ACTIVE STAGES FROM THE SP DATA ##################################
     
     # Set a warning that we had an arduino measurement that was not recorded with the SP data in between the different stages
-    idle.time.exper.ard.abstand.before <- filter(exper.arduino, (real_sec <= (first.record.sm.ab - 120)))
-    idle.time.exper.ard.abstand.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.ab + 120)) &  (real_sec <= (first.record.sm.al - 120)))
-    idle.time.exper.ard.abstand        <- rbind(idle.time.exper.ard.abstand.before,idle.time.exper.ard.abstand.after)
-    
-    unrecorded.exper.ard.abstand <- warnUnrecorded(idle.time.exper.ard.abstand)
-    
-    
-    idle.time.exper.ard.aluminium.before <- filter(exper.arduino, (real_sec >= (last.record.sm.ab + 120)) & (real_sec <= (first.record.sm.al - 120)))
-    idle.time.exper.ard.aluminium.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.al + 120)) & (real_sec <= (first.record.sm.cu - 120)))
-    idle.time.exper.ard.aluminium        <- rbind(idle.time.exper.ard.aluminium.before,idle.time.exper.ard.aluminium.after)
-    
-    unrecorded.exper.ard.aluminium <- warnUnrecorded(idle.time.exper.ard.aluminium)
-    
-    idle.time.exper.ard.kupfer.before <- filter(exper.arduino, (real_sec >= (last.record.sm.al + 120)) &  (real_sec <= (first.record.sm.cu - 120)))
-    idle.time.exper.ard.kupfer.after  <- filter(exper.arduino, (real_sec > (last.record.sm.cu + 120)))
-    idle.time.exper.ard.kupfer        <- rbind(idle.time.exper.ard.kupfer.before,idle.time.exper.ard.kupfer.after)
-    
-    unrecorded.exper.ard.kupfer <- warnUnrecorded(idle.time.exper.ard.kupfer)
-    
+    # idle.time.exper.ard.abstand.before <- filter(exper.arduino, (real_sec <= (first.record.sm.ab - 120)))
+    # idle.time.exper.ard.abstand.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.ab + 120)) &  (real_sec <= (first.record.sm.al - 120)))
+    # idle.time.exper.ard.abstand        <- rbind(idle.time.exper.ard.abstand.before,idle.time.exper.ard.abstand.after)
+    # 
+    # unrecorded.exper.ard.abstand <- warnUnrecorded(idle.time.exper.ard.abstand)
+    # 
+    # 
+    # idle.time.exper.ard.aluminium.before <- filter(exper.arduino, (real_sec >= (last.record.sm.ab + 120)) & (real_sec <= (first.record.sm.al - 120)))
+    # idle.time.exper.ard.aluminium.after  <- filter(exper.arduino, (real_sec >= (last.record.sm.al + 120)) & (real_sec <= (first.record.sm.cu - 120)))
+    # idle.time.exper.ard.aluminium        <- rbind(idle.time.exper.ard.aluminium.before,idle.time.exper.ard.aluminium.after)
+    # 
+    # unrecorded.exper.ard.aluminium <- warnUnrecorded(idle.time.exper.ard.aluminium)
+    # 
+    # idle.time.exper.ard.kupfer.before <- filter(exper.arduino, (real_sec >= (last.record.sm.al + 120)) &  (real_sec <= (first.record.sm.cu - 120)))
+    # idle.time.exper.ard.kupfer.after  <- filter(exper.arduino, (real_sec > (last.record.sm.cu + 120)))
+    # idle.time.exper.ard.kupfer        <- rbind(idle.time.exper.ard.kupfer.before,idle.time.exper.ard.kupfer.after)
+    # 
+    # unrecorded.exper.ard.kupfer <- warnUnrecorded(idle.time.exper.ard.kupfer)
     
     
     
     ###################COMBINATION OF ARDUINO AND SMARTPEN DATA AND VISUALIZATION####################
-    
-    
-    
-    # Extract the unique "real" distances during the active periods of the arduino
-    # exp.distances <-  filter( exper.ard.abstand, measur_status==1) %>% unique()
-    # exp.distances <- unique(exp.distances$distance_cm) %>% as.data.frame()
-    # colnames(exp.distances)[1]<-"distances"
-    
-    
     
     # Extract only the columns we need from the SP data for the Abstand
     visual.aluminium<- filter(exper.aluminium, Bezeichnung == 'Messung_Al') 
