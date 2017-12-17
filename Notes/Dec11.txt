@@ -1,0 +1,32 @@
+1. For the first change that was asked only the slots of the aluminium to be taken into considetation gives us inaccurate results. That is because at the time they were conducting aluminium result they may have also kopper and that would indicate the mistake. I change it and I use only the slots with aluminium but that is inaccurate.
+
+2. For the second change that it has been asked the 5s were corrected but the thing is they had settings for 5 and they were doing another one
+
+
+
+
+
+Kopfer problems: 
+
+At 8J17: There are no values for dicke in the spart pen data.
+
+At 7O19: The values from the SPD have been noted wrong. For the first one instead of 0.05 -which is correctly measured, as seem from the arduino data- we have 0.5. For the second one instead of 0.01 we have 0.1. For the third one instead of 0.005 we have 0.05
+
+
+ At 7J16: There are no values for dicke in the spart pen data.
+
+
+ At 5J16: The arduino starts a little bit earlier than 120 (-300) seconds before the first measurement is noted that is why is not visible. The second measurement should be 0.051 and instead it is only 0.01.  
+
+At 4J17: While the note down that they do measurements of specific thikness they live additional material to other slots that are not needed and we take the mistakes.
+
+At 1O19: The students probably have forgotten all the time the material on the 5th slot (0.08)that is why we take that offset   
+
+
+Copper:
+6O25--> The slots of the materials suppose to have the order 0.0025, 0.005, 0.01, 0.03, 0.06 and with that order is natural to have mistakes. That is because in the first measurement that we have to do the experiments with thikness 0.0025 they use the 5th slot which correspond to the thikness of 0.06. The set of the settings they use for the experiment is correct in terms of distances, but there is no 1 to 1 relation with the order they should have been done.Unless the calibration for the 6th epxeriment is different than the ones that have been given.
+
+
+At 6N15 probably the kopfer started way earlier than the time window we have set before and after the times that are given from the smart pen data.
+
+At 6N07 there is a thikness that is not accepted but it doesn't much the graph
